@@ -26,8 +26,11 @@ htmlcov/
 
 # Environment variables
 .env
+.env.*
 .env.local
 .env.*.local
+.env.production
+.env.development
 
 # IDEs and Editors
 .vscode/
