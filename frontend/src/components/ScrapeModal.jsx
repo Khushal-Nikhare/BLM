@@ -21,7 +21,7 @@ export default function ScrapeModal({ onClose }) {
     if (activeJobId && jobStatus === 'running') {
       interval = setInterval(async () => {
         try {
-          const res = await axios.get(`/scrape/status/${activeJobId}`);
+          const res = await axios.get(`${import.meta.env.VITE_SCRAPER_API_URL}/scrape/status/${activeJobId}`);
           setResults(res.data.results);
           // Automatically select all new items
           setSelectedIndices(new Set(res.data.results.map((_, i) => i)));
@@ -48,7 +48,7 @@ export default function ScrapeModal({ onClose }) {
     setJobStatus('running');
     
     try {
-      const res = await axios.post('/scrape/start', { keyword, location });
+      const res = await axios.post(`${import.meta.env.VITE_SCRAPER_API_URL}/scrape/start`, { keyword, location });
       setActiveJobId(res.data.job_id);
     } catch (err) {
       alert("Failed to start job: " + err.message);
@@ -60,14 +60,14 @@ export default function ScrapeModal({ onClose }) {
     if (!activeJobId) return;
     setJobStatus('stopped'); // immediately assume stopped for UI
     try {
-      await axios.post(`/scrape/stop/${activeJobId}`);
+      await axios.post(`${import.meta.env.VITE_SCRAPER_API_URL}/scrape/stop/${activeJobId}`);
     } catch(err) {
       console.error("Failed to stop job", err);
     }
   };
 
   const saveLead = useMutation({
-    mutationFn: (lead) => axios.post('/api/leads', lead),
+    mutationFn: (lead) => axios.post(`${import.meta.env.VITE_API_URL}/api/leads`, lead),
   });
 
   const toggleSelectAll = () => {

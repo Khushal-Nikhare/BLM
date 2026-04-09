@@ -10,12 +10,12 @@ export default function SearchLeadsModal({ onClose }) {
 
   const { data: results, isLoading, refetch } = useQuery({
     queryKey: ['searchPlaces', query],
-    queryFn: () => axios.get(`/api/search?query=${query}`).then(res => res.data.results),
+    queryFn: () => axios.get(`${import.meta.env.VITE_API_URL}/api/search?query=${query}`).then(res => res.data.results),
     enabled: false,
   });
 
   const saveLead = useMutation({
-    mutationFn: (lead) => axios.post('/api/leads', lead),
+    mutationFn: (lead) => axios.post(`${import.meta.env.VITE_API_URL}/api/leads`, lead),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       // Could show a toast notification here

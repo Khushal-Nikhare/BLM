@@ -15,7 +15,7 @@ export default function CsvImportModal({ onClose }) {
   const queryClient = useQueryClient();
 
   const bulkImportMutation = useMutation({
-    mutationFn: (leadsArray) => axios.post('/api/leads/bulk', leadsArray).then(res => res.data),
+    mutationFn: (leadsArray) => axios.post(`${import.meta.env.VITE_API_URL}/api/leads/bulk`, leadsArray).then(res => res.data),
     onSuccess: (data) => {
       setImportStatus('success');
       setParseStats(prev => ({ ...prev, importedCount: data.count }));

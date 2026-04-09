@@ -14,7 +14,7 @@ export default function Dashboard() {
 
   const { data: leads, isLoading } = useQuery({
     queryKey: ['leads'],
-    queryFn: () => axios.get('/api/leads').then(res => res.data),
+    queryFn: () => axios.get(`${import.meta.env.VITE_API_URL}/api/leads`).then(res => res.data),
   });
 
   const filteredAndSortedLeads = React.useMemo(() => {

@@ -24,17 +24,17 @@ export default function LeadCard({ lead }) {
   
   const { data: users } = useQuery({
     queryKey: ['users'],
-    queryFn: () => axios.get('http://localhost:3001/api/users').then(res => res.data),
+    queryFn: () => axios.get(`${import.meta.env.VITE_API_URL}/api/users`).then(res => res.data),
     enabled: user?.role === 'ADMIN',
   });
 
   const updateLead = useMutation({
-    mutationFn: (updates) => axios.patch(`/api/leads/${lead.id}`, updates).then(res => res.data),
+    mutationFn: (updates) => axios.patch(`${import.meta.env.VITE_API_URL}/api/leads/${lead.id}`, updates).then(res => res.data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['leads'] }),
   });
 
   const deleteLead = useMutation({
-    mutationFn: () => axios.delete(`/api/leads/${lead.id}`),
+    mutationFn: () => axios.delete(`${import.meta.env.VITE_API_URL}/api/leads/${lead.id}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['leads'] }),
   });
 
