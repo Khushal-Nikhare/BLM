@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Lead {
+  id             String    @id @default(uuid())
+  googlePlaceId  String?   @unique
+  businessName   String
+  address        String
+  phoneNumber    String?
+  website        String?
+  googleMapsLink String?
+  rating         Float?
+  callStatus     String    @default("Not Called")
+  notes          String    @default("")
+  meetingDate    DateTime?
+  callLaterDate  DateTime?
+  tag            String    @default("New Lead")
+  interestStatus String    @default("Pending")
+  searchKeyword  String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  userId         String?
+  user           User?     @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("MEMBER")
+  leads        Lead[]
+}
