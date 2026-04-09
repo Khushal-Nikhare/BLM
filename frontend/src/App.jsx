@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { Home, Users, Settings, PlusCircle, Search, DownloadCloud, FileSpreadsheet, LogOut } from 'lucide-react';
+import { Home, Users, Settings, PlusCircle, Search, DownloadCloud, FileSpreadsheet, LogOut, UserPlus } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -61,6 +61,12 @@ function AuthenticatedLayout({ children }) {
           <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors mt-2">
             <PlusCircle size={18} /> Add Custom Lead
           </button>
+          
+          {user?.role === 'ADMIN' && (
+            <Link to="/add-user" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-purple-700 bg-purple-50 hover:bg-purple-100 font-medium transition-colors border border-purple-100 mt-2">
+              <UserPlus size={18} /> Create User
+            </Link>
+          )}
         </nav>
 
         <div className="p-4 border-t border-slate-200 flex flex-col gap-2">
@@ -91,11 +97,17 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={
           <ProtectedRoute>
             <AuthenticatedLayout>
               <Dashboard />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/add-user" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <RegisterPage />
             </AuthenticatedLayout>
           </ProtectedRoute>
         } />

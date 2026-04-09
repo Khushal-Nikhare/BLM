@@ -2,12 +2,13 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import { verifyToken, verifyAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 const SECRET = process.env.JWT_SECRET || 'default_secret';
 
-router.post('/register', async (req, res) => {
+router.post('/register', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { email, password, role } = req.body;
     

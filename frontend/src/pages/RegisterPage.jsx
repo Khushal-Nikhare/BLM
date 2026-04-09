@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+
 import axios from 'axios';
 import { UserPlus } from 'lucide-react';
 
@@ -10,7 +10,7 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const navigate = useNavigate();
+
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -23,7 +23,11 @@ const RegisterPage = () => {
         role
       });
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => {
+        setSuccess(false);
+        setEmail('');
+        setPassword('');
+      }, 3000);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to register');
     } finally {
@@ -38,8 +42,8 @@ const RegisterPage = () => {
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4">
             <UserPlus className="text-white w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Create Account</h1>
-          <p className="text-slate-500 text-sm mt-1">Join your team to manage leads</p>
+          <h1 className="text-2xl font-bold text-slate-800">Add New User</h1>
+          <p className="text-slate-500 text-sm mt-1">Create a new member or admin account</p>
         </div>
 
         {error && (
@@ -50,8 +54,8 @@ const RegisterPage = () => {
 
         {success ? (
           <div className="bg-green-50 text-green-700 p-4 rounded-lg text-center border border-green-200">
-            <p className="font-medium">Account created successfully!</p>
-            <p className="text-sm mt-1 text-green-600">Redirecting to login...</p>
+            <p className="font-medium">User created successfully!</p>
+            <p className="text-sm mt-1 text-green-600">They can now log in.</p>
           </div>
         ) : (
           <form onSubmit={handleRegister} className="space-y-5">
@@ -96,17 +100,12 @@ const RegisterPage = () => {
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 mt-2"
             >
-              {loading ? 'Creating account...' : 'Sign Up'}
+              {loading ? 'Creating user...' : 'Create User'}
             </button>
           </form>
         )}
 
-        <p className="mt-6 text-center text-sm text-slate-500">
-          Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium tracking-tight">
-            Sign in
-          </Link>
-        </p>
+
       </div>
     </div>
   );
