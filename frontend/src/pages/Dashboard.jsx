@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { Search, Filter, SortDesc, Loader2, Inbox, LogOut } from 'lucide-react';
+import { Search, Filter, SortDesc, Loader2, Inbox, LogOut, LayoutGrid, List } from 'lucide-react';
 import LeadCard from '../components/LeadCard';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -10,16 +10,24 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterTag, setFilterTag] = useState('All');
+  const [filterKeyword, setFilterKeyword] = useState('All');
   const [sortBy, setSortBy] = useState('dateDesc');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'row'
 
   const { data: leads, isLoading } = useQuery({
     queryKey: ['leads'],
     queryFn: () => axios.get(`${import.meta.env.VITE_API_URL}/api/leads`).then(res => res.data),
   });
 
+  const uniqueKeywords = React.useMemo(() => {
+    if (!leads) return [];
+    const keywords = leads.map(l => l.searchKeyword).filter(Boolean);
+    return [...new Set(keywords)].sort();
+  }, [leads]);
+
   const filteredAndSortedLeads = React.useMemo(() => {
     if (!leads) return [];
-    
+
     let result = leads.filter(lead => {
       // Search
       if (searchTerm && !lead.businessName.toLowerCase().includes(searchTerm.toLowerCase())) return false;
@@ -27,7 +35,9 @@ export default function Dashboard() {
       if (filterStatus !== 'All' && lead.callStatus !== filterStatus) return false;
       // Filter Interest Status
       if (filterTag !== 'All' && lead.interestStatus !== filterTag) return false;
-      
+      // Filter Keyword
+      if (filterKeyword !== 'All' && lead.searchKeyword !== filterKeyword) return false;
+
       return true;
     });
 
@@ -50,26 +60,26 @@ export default function Dashboard() {
     });
 
     return result;
-  }, [leads, searchTerm, filterStatus, filterTag, sortBy]);
+  }, [leads, searchTerm, filterStatus, filterTag, filterKeyword, sortBy]);
 
   return (
-    <div className="h-full flex flex-col bg-slate-50/50">
+    <div className="h-full flex flex-col bg-slate-50/50 dark:bg-slate-950 transition-colors">
       {/* Top Header */}
-      <header className="h-16 px-8 flex items-center justify-between border-b border-slate-200 bg-white sticky top-0 z-10 shrink-0">
-        <h1 className="text-xl font-semibold text-slate-800">Overview</h1>
+      <header className="h-16 px-8 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-10 shrink-0">
+        <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Overview</h1>
         <div className="flex items-center gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="Search saved leads..."
-              className="pl-9 pr-4 py-2 w-64 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all"
+              className="pl-9 pr-4 py-2 w-64 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-blue-400 outline-none transition-all text-slate-800 dark:text-slate-100"
             />
           </div>
-          <button 
-            onClick={logout} 
+          <button
+            onClick={logout}
             className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-red-600 transition-colors ml-4"
           >
             <LogOut size={16} /> Logout
@@ -79,16 +89,16 @@ export default function Dashboard() {
 
       {/* Main Content scrollable area */}
       <div className="flex-1 overflow-auto p-8">
-        
+
         {/* Filters Bar */}
-        <div className="flex flex-wrap gap-4 mb-6 items-center p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+        <div className="flex flex-wrap gap-4 mb-6 items-center p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
           <div className="flex items-center gap-2 text-sm">
             <Filter size={16} className="text-slate-400" />
-            <span className="font-medium text-slate-700">Status:</span>
-            <select 
-              value={filterStatus} 
+            <span className="font-medium text-slate-700 dark:text-slate-300">Status:</span>
+            <select
+              value={filterStatus}
               onChange={e => setFilterStatus(e.target.value)}
-              className="bg-slate-50 border border-slate-200 text-slate-700 rounded-md py-1.5 px-3 outline-none focus:ring-2 focus:ring-blue-100"
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-md py-1.5 px-3 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
             >
               <option value="All">All Statuses</option>
               <option value="Not Called">Not Called</option>
@@ -97,29 +107,45 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2 text-sm">
-             <span className="font-medium text-slate-700">Sentiment:</span>
-             <select 
-              value={filterTag} 
+            <span className="font-medium text-slate-700 dark:text-slate-300">Sentiment:</span>
+            <select
+              value={filterTag}
               onChange={e => setFilterTag(e.target.value)}
-              className="bg-slate-50 border border-slate-200 text-slate-700 rounded-md py-1.5 px-3 outline-none focus:ring-2 focus:ring-blue-100"
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-md py-1.5 px-3 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
             >
               <option value="All">All Sentiments</option>
               <option value="Pending">Pending</option>
               <option value="Interested">Interested</option>
+              <option value="Potential">Potential</option>
               <option value="Call Later">Call Later</option>
               <option value="Meet">Meet</option>
               <option value="Converted">Converted</option>
               <option value="Not Interested">Not Interested</option>
+              <option value="Not Potential">Not Potential</option>
             </select>
           </div>
 
-          <div className="ml-auto flex items-center gap-2 text-sm border-l border-slate-200 pl-4">
-             <SortDesc size={16} className="text-slate-400" />
-             <span className="font-medium text-slate-700">Sort by:</span>
-             <select 
-              value={sortBy} 
+          <div className="flex items-center gap-2 text-sm">
+            <span className="font-medium text-slate-700 dark:text-slate-300">Keyword:</span>
+            <select
+              value={filterKeyword}
+              onChange={e => setFilterKeyword(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-md py-1.5 px-3 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 max-w-[200px]"
+            >
+              <option value="All">All Keywords</option>
+              {uniqueKeywords.map(kw => (
+                <option key={kw} value={kw}>{kw}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="ml-auto flex items-center gap-2 text-sm border-l border-slate-200 dark:border-slate-700 pl-4">
+            <SortDesc size={16} className="text-slate-400" />
+            <span className="font-medium text-slate-700 dark:text-slate-300">Sort by:</span>
+            <select
+              value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="bg-slate-50 border border-slate-200 text-slate-700 rounded-md py-1.5 px-3 outline-none focus:ring-2 focus:ring-blue-100"
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-md py-1.5 px-3 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
             >
               <option value="dateDesc">Newest Added</option>
               <option value="dateAsc">Oldest Added</option>
@@ -128,25 +154,66 @@ export default function Dashboard() {
               <option value="callLaterDesc">Follow-up Call Dates</option>
             </select>
           </div>
+
+          {/* View Toggle */}
+          <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 ml-4 border border-slate-200 dark:border-slate-700">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+              title="Grid View"
+            >
+              <LayoutGrid size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode('row')}
+              className={`p-1.5 rounded-md transition-colors ml-1 ${viewMode === 'row' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+              title="List View"
+            >
+              <List size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Leads Grid */}
         {isLoading ? (
           <div className="flex items-center justify-center p-20 text-slate-400 gap-3">
-             <Loader2 size={24} className="animate-spin" /> Loading Leads...
+            <Loader2 size={24} className="animate-spin" /> Loading Leads...
           </div>
         ) : filteredAndSortedLeads.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-            {filteredAndSortedLeads.map(lead => (
-              <LeadCard key={lead.id} lead={lead} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center p-20 bg-white rounded-xl border border-slate-100 border-dashed text-slate-500">
-            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <Inbox size={32} className="text-slate-300" />
+          viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+              {filteredAndSortedLeads.map(lead => (
+                <LeadCard key={lead.id} lead={lead} />
+              ))}
             </div>
-            <h3 className="text-lg font-medium text-slate-700 mb-1">No Leads Found</h3>
+          ) : (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold border-b border-slate-200 dark:border-slate-800">
+                    <th className="px-4 py-3 min-w-[200px]">Business & Location</th>
+                    <th className="px-4 py-3 min-w-[120px]">Sentiment</th>
+                    <th className="px-4 py-3 min-w-[120px]">Call Status</th>
+                    <th className="px-4 py-3 min-w-[120px]">Phone</th>
+                    <th className="px-4 py-3 min-w-[150px]">Date Scheduled</th>
+                    <th className="px-4 py-3 min-w-[200px]">Notes</th>
+                    <th className="px-4 py-3 min-w-[80px] text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAndSortedLeads.map(lead => (
+                    <LeadCard key={lead.id} lead={lead} viewMode="row" />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        ) : (
+          <div className="flex flex-col items-center justify-center p-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 border-dashed text-slate-500 dark:text-slate-400">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+              <Inbox size={32} className="text-slate-300 dark:text-slate-600" />
+            </div>
+            <h3 className="text-lg font-medium text-slate-700 dark:text-slate-200 mb-1">No Leads Found</h3>
             <p className="text-sm">Save your first lead using the "Find New Leads" button in the sidebar.</p>
           </div>
         )}

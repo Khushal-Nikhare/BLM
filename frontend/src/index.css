@@ -2,29 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  /* Smooth theme transitions on key elements */
+  body,
+  aside,
+  header,
+  main,
+  nav,
+  div,
+  section {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Base body styles */
+  body {
+    @apply m-0 p-0 bg-slate-50 text-slate-800 antialiased;
+    box-sizing: border-box;
+  }
+
+  /* Dark mode body override */
+  .dark body {
+    @apply bg-slate-950 text-slate-100;
+  }
+
+  /* Fix dark mode autofill inputs (Chrome) */
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f1f5f9;
+    -webkit-box-shadow: 0 0 0px 1000px #1e293b inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* Dark mode placeholder styling */
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    @apply text-slate-500;
+  }
+
+  /* Dark mode <select> option backgrounds */
+  .dark select option {
+    @apply bg-slate-900 text-slate-100;
+  }
+}
+
 @layer utilities {
   .glass-panel {
     @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm;
   }
+  .dark .glass-panel {
+    @apply bg-slate-900/70 border-slate-700/40;
+  }
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* Custom Scrollbar */
+/* Custom Scrollbar - Light mode */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9; 
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1; 
+  background: #cbd5e1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8; 
+  background: #94a3b8;
+}
+
+/* Custom Scrollbar - Dark mode */
+.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Datetime input dark mode fixes */
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }

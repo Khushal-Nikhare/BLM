@@ -62,3 +62,6 @@ Desktop.ini
 *.sqlite
 *.sqlite3
 node_modules
+
+
+backend/update_leads.js

@@ -10,7 +10,7 @@ export default function CsvImportModal({ onClose }) {
   const [parseStats, setParseStats] = useState(null);
   const [importStatus, setImportStatus] = useState('idle'); // idle, importing, success, error
   const [errorMsg, setErrorMsg] = useState('');
-  
+
   const fileInputRef = useRef();
   const queryClient = useQueryClient();
 
@@ -41,11 +41,11 @@ export default function CsvImportModal({ onClose }) {
 
   const processCsv = () => {
     if (!file) return;
-    
+
     setIsParsing(true);
     setImportStatus('idle');
     setErrorMsg('');
-    
+
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
@@ -55,10 +55,10 @@ export default function CsvImportModal({ onClose }) {
           // Robustly clean rating
           let ratingValue = null;
           if (row['Average Rating']) {
-             const parsed = parseFloat(row['Average Rating']);
-             if (!isNaN(parsed)) ratingValue = parsed;
+            const parsed = parseFloat(row['Average Rating']);
+            if (!isNaN(parsed)) ratingValue = parsed;
           }
-          
+
           return {
             googlePlaceId: row['Place Id'] || `csv_import_${Math.random().toString(36).substring(2, 10)}`,
             businessName: row['Name'] || "Unknown Business",
@@ -72,7 +72,7 @@ export default function CsvImportModal({ onClose }) {
             searchKeyword: row['Search Keyword'] || null,
           };
         });
-        
+
         setParseStats({ totalRows: results.data.length, mappedLeads });
       },
       error: (err) => {
@@ -91,15 +91,15 @@ export default function CsvImportModal({ onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
-        
+      <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-xl flex flex-col animate-in fade-in zoom-in-95 duration-200 border dark:border-slate-800">
+
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-2xl">
           <div>
-            <h2 className="text-xl font-bold text-slate-800">Import Leads from CSV</h2>
-            <p className="text-sm text-slate-500">Upload exports from mapping tools (Outscraper, DataMiner, etc).</p>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Import Leads from CSV</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Upload exports from mapping tools (Outscraper, DataMiner, etc).</p>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -108,17 +108,17 @@ export default function CsvImportModal({ onClose }) {
         <div className="p-6">
           {importStatus === 'success' ? (
             <div className="py-12 flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
-                 <CheckCircle size={32} />
+              <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle size={32} />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Import Successful!</h3>
-              <p className="text-slate-600">
-                Successfully imported <span className="font-bold text-slate-900">{parseStats.importedCount}</span> leads. <br/>
-                <span className="text-sm text-slate-500">(Duplicates were safely skipped)</span>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Import Successful!</h3>
+              <p className="text-slate-600 dark:text-slate-400">
+                Successfully imported <span className="font-bold text-slate-900 dark:text-slate-100">{parseStats.importedCount}</span> leads. <br />
+                <span className="text-sm text-slate-500 dark:text-slate-500">(Duplicates were safely skipped)</span>
               </p>
-              <button 
+              <button
                 onClick={onClose}
-                className="mt-6 px-6 py-2 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                className="mt-6 px-6 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Return to Dashboard
               </button>
@@ -126,30 +126,30 @@ export default function CsvImportModal({ onClose }) {
           ) : (
             <>
               {/* Upload Dropzone Area */}
-              <div 
+              <div
                 className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-colors cursor-pointer
-                  ${file ? 'border-blue-400 bg-blue-50/30' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'}`}
+                  ${file ? 'border-blue-400 dark:border-blue-500 bg-blue-50/30 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'}`}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   accept=".csv"
                   ref={fileInputRef}
                   className="hidden"
                   onChange={handleFileChange}
                 />
-                
+
                 {file ? (
                   <>
-                    <FileUp size={36} className="text-blue-500 mb-3" />
-                    <p className="text-slate-800 font-semibold">{file.name}</p>
-                    <p className="text-xs text-slate-500 mt-1">{(file.size / 1024).toFixed(2)} KB</p>
+                    <FileUp size={36} className="text-blue-500 dark:text-blue-400 mb-3" />
+                    <p className="text-slate-800 dark:text-slate-100 font-semibold">{file.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{(file.size / 1024).toFixed(2)} KB</p>
                   </>
                 ) : (
                   <>
-                    <FileUp size={36} className="text-slate-400 mb-3" />
-                    <p className="text-slate-700 font-medium mb-1">Click to browse or drag a CSV file here</p>
-                    <p className="text-xs text-slate-400">Must include headers (Name, Phone, Fulladdress, etc)</p>
+                    <FileUp size={36} className="text-slate-400 dark:text-slate-500 mb-3" />
+                    <p className="text-slate-700 dark:text-slate-300 font-medium mb-1">Click to browse or drag a CSV file here</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">Must include headers (Name, Phone, Fulladdress, etc)</p>
                   </>
                 )}
               </div>
@@ -157,10 +157,10 @@ export default function CsvImportModal({ onClose }) {
               {/* Status & Actions */}
               <div className="mt-6">
                 {!parseStats && file && (
-                  <button 
+                  <button
                     onClick={processCsv}
                     disabled={isParsing}
-                    className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
+                    className="w-full h-12 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl font-medium transition-colors disabled:opacity-70 flex items-center justify-center gap-2 shadow-lg"
                   >
                     {isParsing ? <Loader2 size={18} className="animate-spin" /> : null}
                     Parse CSV Data
@@ -168,12 +168,12 @@ export default function CsvImportModal({ onClose }) {
                 )}
 
                 {parseStats && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
-                    <h4 className="font-semibold text-slate-700 mb-2">Ready to Import</h4>
-                    <p className="text-sm text-slate-600 mb-4">
-                      Found <span className="font-bold text-slate-900">{parseStats.totalRows}</span> rows in the CSV. Mapped properly to database structure.
+                  <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 mb-4">
+                    <h4 className="font-semibold text-slate-700 dark:text-slate-200 mb-2">Ready to Import</h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Found <span className="font-bold text-slate-900 dark:text-slate-100">{parseStats.totalRows}</span> rows in the CSV. Mapped properly to database structure.
                     </p>
-                    <button 
+                    <button
                       onClick={doImport}
                       disabled={importStatus === 'importing'}
                       className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
