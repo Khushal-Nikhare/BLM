@@ -60,6 +60,11 @@ export default function LeadCard({ lead, viewMode = 'grid' }) {
           <div className="font-semibold text-slate-800 dark:text-slate-100 line-clamp-1 max-w-[200px]" title={lead.businessName}>
             {lead.businessName}
           </div>
+          {user?.role === 'ADMIN' && (
+            <div className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400 mt-0.5">
+              Assigned: {lead.user ? lead.user.email : 'Unassigned'}
+            </div>
+          )}
           {lead.address && (
             <div className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 max-w-[200px] flex items-center gap-1 mt-0.5">
               <MapPin size={12} className="shrink-0" />
@@ -162,6 +167,11 @@ export default function LeadCard({ lead, viewMode = 'grid' }) {
                 {lead.searchKeyword}
               </span>
             )}
+            {user?.role === 'ADMIN' && (
+              <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 rounded text-[10px] font-bold tracking-wider max-w-[120px] truncate" title={lead.user?.email || 'Unassigned'}>
+                {lead.user ? lead.user.email : 'Unassigned'}
+              </span>
+            )}
           </div>
         </div>
         
@@ -187,7 +197,7 @@ export default function LeadCard({ lead, viewMode = 'grid' }) {
             </a>
           )}
           {lead.website && (
-            <a href={lead.website} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+            <a href={lead.website.match(/^https?:\/\//) ? lead.website : `https://${lead.website}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
               <Globe size={14} /> Website
             </a>
           )}
