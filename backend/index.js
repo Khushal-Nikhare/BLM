@@ -147,15 +147,20 @@ app.post("/api/leads/bulk", verifyToken, async (req, res) => {
     // Attach userId to all imported leads
     leadsData = leadsData.map((lead) => ({ ...lead, userId: req.user.id }));
 
-    // Extract all valid googlePlaceIds to fetch existing records in one query
-    const placeIds = leadsData
-      .map((lead) => lead.googlePlaceId)
-      .filter((id) => id);
+    // Extract unique valid googlePlaceIds to fetch existing records in one query
+    const placeIds = Array.from(
+      new Set(leadsData.map((lead) => lead.googlePlaceId).filter((id) => id))
+    );
 
+    const isAdmin = req.user.role === "ADMIN";
     const existingRecords =
       placeIds.length > 0
         ? await prisma.lead.findMany({
-            where: { googlePlaceId: { in: placeIds } },
+            where: {
+              googlePlaceId: { in: placeIds },
+              // Non-admins can only match against their own leads
+              ...(isAdmin ? {} : { userId: req.user.id }),
+            },
           })
         : [];
 
@@ -194,7 +199,12 @@ app.post("/api/leads/bulk", verifyToken, async (req, res) => {
             continue;
           }
         }
-        await prisma.lead.create({ data: leadData });
+        const created = await prisma.lead.create({ data: leadData });
+        // Track newly-created records so duplicate placeIds later in the
+        // same payload are updated rather than re-inserted.
+        if (created.googlePlaceId) {
+          existingMap.set(created.googlePlaceId, created);
+        }
         count++;
       } catch (err) {
         // gracefully skip rows with validation errors
