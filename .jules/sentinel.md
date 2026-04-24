@@ -1,0 +1,4 @@
+## 2024-05-18 - [CRITICAL] Fix missing authentication on Google Places endpoints
+**Vulnerability:** Missing authentication on sensitive endpoints. The `/api/search` and `/api/place-details/:id` endpoints proxy requests to the Google Places API, which costs money. Without authentication, anyone can hit these endpoints and cause financial loss or quota exhaustion.
+**Learning:** Proxy endpoints to external paid APIs must always be secured to prevent abuse, even if they only read data.
+**Prevention:** Always use authentication middleware like `verifyToken` on all routes that consume external paid resources, and consider adding rate limiting.
