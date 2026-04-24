@@ -35,6 +35,7 @@ export default function LeadCard({ lead, viewMode = 'grid' }) {
     queryKey: ['users'],
     queryFn: () => axios.get(`${import.meta.env.VITE_API_URL}/api/users`).then(res => res.data),
     enabled: user?.role === 'ADMIN',
+    staleTime: Infinity,
   });
 
   const updateLead = useMutation({
