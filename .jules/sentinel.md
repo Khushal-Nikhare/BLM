@@ -1,0 +1,4 @@
+## 2024-05-24 - [CRITICAL] Prevent Hardcoded JWT Secret Fallbacks
+**Vulnerability:** Found `const SECRET = process.env.JWT_SECRET || 'default_secret';` in `backend/middleware/auth.js` and `backend/routes/auth.js`. This allows attackers to forge JWT tokens if the `JWT_SECRET` environment variable is not explicitly set or fails to load, granting unauthorized access to the application.
+**Learning:** Fallbacks for cryptographic keys or secrets should never use hardcoded, predictable strings. If a secret is missing, the application should fail to start (fail-fast) rather than running in an insecure state.
+**Prevention:** Always validate the presence of critical secrets during application initialization and exit the process (`process.exit(1)`) if they are missing. Avoid using `|| 'default_secret'` or similar fallbacks for sensitive values.
