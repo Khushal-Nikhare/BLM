@@ -6,7 +6,12 @@ import { verifyToken, verifyAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
-const SECRET = process.env.JWT_SECRET || 'default_secret';
+
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET is not defined.");
+  process.exit(1);
+}
 
 router.post('/register', verifyToken, verifyAdmin, async (req, res) => {
   try {
