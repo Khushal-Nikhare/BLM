@@ -1,6 +1,10 @@
 import jwt from 'jsonwebtoken';
 
-const SECRET = process.env.JWT_SECRET || 'default_secret';
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET environment variable is not defined.");
+  process.exit(1);
+}
 
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
