@@ -1,6 +1,11 @@
 import jwt from 'jsonwebtoken';
 
-const SECRET = process.env.JWT_SECRET || 'default_secret';
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) {
+  // 🛡️ Sentinel: Fail securely if JWT_SECRET is missing instead of using an insecure fallback
+  console.error("CRITICAL SECURITY ERROR: JWT_SECRET environment variable is not set.");
+  process.exit(1);
+}
 
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
