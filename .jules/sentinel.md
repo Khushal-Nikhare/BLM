@@ -1,0 +1,4 @@
+## 2024-05-23 - [Critical: Default Cryptographic Secret Fallback]
+**Vulnerability:** JWT authentication configuration in backend routes and middleware was configured to use `'default_secret'` if `process.env.JWT_SECRET` was omitted from the environment variables.
+**Learning:** Hardcoding default fallbacks for cryptographic secrets (like JWT secrets) creates a critical risk where deployments without properly configured environments will inherently use weak, predictable, and publicly known secrets, leading to complete authentication bypass or token forgery.
+**Prevention:** Cryptographic secrets and other highly sensitive configurations must follow a "fail secure" principle. If a critical secret is missing from the environment configuration during startup, the application should log a prominent critical error and immediately exit (`process.exit(1)`). It must never fall back to an insecure default value.
