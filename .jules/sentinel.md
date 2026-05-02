@@ -1,0 +1,4 @@
+## 2024-05-02 - [CRITICAL] Fix insecure JWT secret fallback
+**Vulnerability:** The backend had an insecure fallback for the JWT secret: `const SECRET = process.env.JWT_SECRET || 'default_secret';`. This meant that if the secret was misconfigured in production or omitted, the application would silently start up using a known, default secret. This could allow an attacker to forge JWT tokens and gain unauthorized access to all user accounts and administrative functionalities (auth bypass).
+**Learning:** Cryptographic secrets and API keys must never have a hardcoded fallback value. When required secrets are missing, an application should fail securely, immediately crashing on startup rather than continuing in a vulnerable state.
+**Prevention:** Remove fallback logic for all required environment variables. Implement a hard fail (`process.exit(1)`) during server initialization if vital cryptographic keys are not present.
