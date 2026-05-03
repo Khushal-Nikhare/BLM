@@ -1,0 +1,4 @@
+## 2026-05-03 - [CRITICAL] Fixed IDOR/Authorization bypass in Leads API
+**Vulnerability:** The `PATCH /api/leads/:id` and `POST /api/leads/bulk` endpoints in `backend/index.js` lacked ownership checks. A user could update or overwrite another user's leads by providing a known `id` or `googlePlaceId`.
+**Learning:** In a multi-tenant or multi-user application, simply authenticating a user via a token is insufficient for operations that modify specific resources. The application must explicitly verify that the authenticated user is authorized to perform the action on the requested resource.
+**Prevention:** Always implement an authorization check (e.g., `if (resource.userId !== req.user.id && req.user.role !== 'ADMIN')`) before updating or deleting user-specific records. Rely on role-based checks like `verifyAdmin` for operations that do not have an explicit ownership relationship.

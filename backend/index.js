@@ -150,6 +150,11 @@ app.post('/api/leads/bulk', verifyToken, async (req, res) => {
             where: { googlePlaceId: leadData.googlePlaceId } 
           });
           if (existing) {
+            // Prevent IDOR: Ensure user owns the lead before updating
+            if (existing.userId !== req.user.id && req.user.role !== 'ADMIN') {
+              console.warn(`Unauthorized attempt to update lead ${existing.id} by user ${req.user.id}`);
+              continue;
+            }
             // Update the record with new information if it exists, preserving custom tags/statuses
             await prisma.lead.update({
               where: { id: existing.id },
@@ -186,6 +191,15 @@ app.post('/api/leads/bulk', verifyToken, async (req, res) => {
 app.patch('/api/leads/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
+    const lead = await prisma.lead.findUnique({ where: { id } });
+    if (!lead) {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+    // Prevent IDOR: Ensure user owns the lead before updating
+    if (lead.userId !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Unauthorized to update this lead' });
+    }
+
     const updatedLead = await prisma.lead.update({
       where: { id },
       data: req.body
