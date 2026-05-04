@@ -6,7 +6,6 @@ import { verifyToken, verifyAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
-const SECRET = process.env.JWT_SECRET || 'default_secret';
 
 router.post('/register', verifyToken, verifyAdmin, async (req, res) => {
   try {
@@ -60,9 +59,16 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // 🛡️ Sentinel: Dynamically read JWT_SECRET to ensure it's loaded after dotenv
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('CRITICAL: JWT_SECRET is not configured.');
+      return res.status(500).json({ error: 'Internal server error: Authentication configuration missing.' });
+    }
+
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      SECRET,
+      secret,
       { expiresIn: '24h' }
     );
 
