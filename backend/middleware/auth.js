@@ -1,8 +1,13 @@
 import jwt from 'jsonwebtoken';
 
-const SECRET = process.env.JWT_SECRET || 'default_secret';
-
 export const verifyToken = (req, res, next) => {
+  // 🛡️ Sentinel: Dynamically read JWT_SECRET to ensure it's loaded after dotenv
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    console.error('CRITICAL: JWT_SECRET is not configured.');
+    return res.status(500).json({ error: 'Internal server error: Authentication configuration missing.' });
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(401).json({ error: 'No token provided' });
@@ -10,7 +15,7 @@ export const verifyToken = (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, SECRET);
+    const decoded = jwt.verify(token, secret);
     req.user = decoded;
     next();
   } catch (error) {
