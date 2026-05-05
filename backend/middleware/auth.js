@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken';
 
-const SECRET = process.env.JWT_SECRET || 'default_secret';
-
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
@@ -9,6 +7,13 @@ export const verifyToken = (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1];
+  const SECRET = process.env.JWT_SECRET;
+
+  if (!SECRET) {
+    console.error('CRITICAL: JWT_SECRET is not configured');
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+
   try {
     const decoded = jwt.verify(token, SECRET);
     req.user = decoded;

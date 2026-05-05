@@ -6,7 +6,6 @@ import { verifyToken, verifyAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
-const SECRET = process.env.JWT_SECRET || 'default_secret';
 
 router.post('/register', verifyToken, verifyAdmin, async (req, res) => {
   try {
@@ -58,6 +57,12 @@ router.post('/login', async (req, res) => {
 
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const SECRET = process.env.JWT_SECRET;
+    if (!SECRET) {
+      console.error('CRITICAL: JWT_SECRET is not configured');
+      return res.status(500).json({ error: 'Internal server error' });
     }
 
     const token = jwt.sign(
