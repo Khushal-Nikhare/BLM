@@ -150,6 +150,11 @@ app.post('/api/leads/bulk', verifyToken, async (req, res) => {
             where: { googlePlaceId: leadData.googlePlaceId } 
           });
           if (existing) {
+            // IDOR Protection: only owner or ADMIN can update an existing lead
+            if (existing.userId !== req.user.id && req.user.role !== 'ADMIN') {
+              continue;
+            }
+
             // Update the record with new information if it exists, preserving custom tags/statuses
             await prisma.lead.update({
               where: { id: existing.id },
@@ -186,6 +191,16 @@ app.post('/api/leads/bulk', verifyToken, async (req, res) => {
 app.patch('/api/leads/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
+    const existingLead = await prisma.lead.findUnique({ where: { id } });
+    if (!existingLead) {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+
+    // IDOR Protection: only owner or ADMIN can update
+    if (existingLead.userId !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Forbidden: You do not own this lead' });
+    }
+
     const updatedLead = await prisma.lead.update({
       where: { id },
       data: req.body
