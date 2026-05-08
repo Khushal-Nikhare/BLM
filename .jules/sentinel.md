@@ -1,0 +1,4 @@
+## 2024-05-08 - [CRITICAL] Fix insecure JWT secret fallback
+**Vulnerability:** The application was silently falling back to a hardcoded string ('default_secret') for JWT signing and verification when the `JWT_SECRET` environment variable was missing or undefined at module load time.
+**Learning:** In Node.js applications using ES modules (`import`), imports are evaluated before `dotenv.config()` is executed in the main entry point (e.g., `index.js`). This means top-level references to `process.env.*` in imported modules will often be `undefined`, causing fallback logic to be used insecurely in production without warning.
+**Prevention:** Always evaluate critical environment variables (like secrets) dynamically inside functions/routes rather than at the top level of the module. Ensure missing secrets fail securely (e.g., 500 error and a critical log) instead of using insecure default fallbacks.
