@@ -1,0 +1,4 @@
+## 2024-05-10 - [CRITICAL] Missing Authorization on Lead Update Endpoint
+**Vulnerability:** IDOR (Insecure Direct Object Reference) on `/api/leads/:id` PATCH endpoint. Any authenticated user could provide another user's Lead ID and update their data.
+**Learning:** In REST endpoints performing updates, relying solely on global authentication middleware (`verifyToken`) is insufficient if the entity belongs to a specific user. The route must also verify entity ownership against the requester's ID or check for admin privileges before proceeding with the modification. Returning 404 instead of 403 on authorization failure prevents leaking the existence of other users' records.
+**Prevention:** For any route accessing a resource with a `userId`, explicitly check `req.user.role === 'ADMIN' || resource.userId === req.user.id` before executing the operation. Ensure consistent behavior to avoid data leakage.

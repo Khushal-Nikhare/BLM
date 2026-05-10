@@ -186,6 +186,21 @@ app.post('/api/leads/bulk', verifyToken, async (req, res) => {
 app.patch('/api/leads/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
+    // SECURITY: Prevent IDOR (Insecure Direct Object Reference)
+    // Check if the lead exists and if the user is authorized to update it
+    const existingLead = await prisma.lead.findUnique({
+      where: { id }
+    });
+
+    if (!existingLead) {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+
+    if (req.user.role !== 'ADMIN' && existingLead.userId !== req.user.id) {
+      // Return 404 instead of 403 to prevent leaking existence of records
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+
     const updatedLead = await prisma.lead.update({
       where: { id },
       data: req.body
