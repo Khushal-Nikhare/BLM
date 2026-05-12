@@ -1,0 +1,4 @@
+## 2024-05-12 - Missing Authentication on API Proxy Endpoints
+**Vulnerability:** The `/api/search` and `/api/place-details/:id` endpoints in the backend Express server were exposed without authentication. Since these endpoints act as proxies to the Google Places API using the server's `GOOGLE_PLACES_API_KEY`, they could be accessed by unauthenticated attackers to query Google APIs at the application's expense.
+**Learning:** Even if an endpoint doesn't directly query the application's own database (like a third-party API proxy), it MUST be protected if it consumes resources, exposes credentials, or incurs costs. The architecture implicitly trusted that only the frontend would call these routes.
+**Prevention:** Implement an API Gateway pattern or apply strict middleware verification (`verifyToken`) on ALL proxy routes unless explicitly meant to be public. Always evaluate the cost/resource implications of unauthenticated proxy endpoints.
