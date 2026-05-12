@@ -48,7 +48,7 @@ app.get('/', (req, res) => res.send('BLM API is running'));
 // ----------------------------------------------------
 // Google Places Integration
 // ----------------------------------------------------
-app.get('/api/search', async (req, res) => {
+app.get('/api/search', verifyToken, async (req, res) => {
   const { query } = req.query;
   if (!query) {
     return res.status(400).json({ error: 'Query parameter is required' });
@@ -79,7 +79,7 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
-app.get('/api/place-details/:id', async (req, res) => {
+app.get('/api/place-details/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   try {
