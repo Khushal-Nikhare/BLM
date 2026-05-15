@@ -6,7 +6,13 @@ import { verifyToken, verifyAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
-const SECRET = process.env.JWT_SECRET || 'default_secret';
+
+const getSecret = () => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('CRITICAL: JWT_SECRET environment variable is missing.');
+  }
+  return process.env.JWT_SECRET;
+};
 
 router.post('/register', verifyToken, verifyAdmin, async (req, res) => {
   try {
@@ -60,15 +66,20 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    const secret = getSecret();
+
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      SECRET,
+      secret,
       { expiresIn: '24h' }
     );
 
     res.json({ token, role: user.role, id: user.id });
   } catch (error) {
     console.error(error);
+    if (error.message.startsWith('CRITICAL:')) {
+      return res.status(500).json({ error: 'Internal server error: Security misconfiguration' });
+    }
     res.status(500).json({ error: 'Internal server error' });
   }
 });
