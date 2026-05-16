@@ -1,6 +1,12 @@
 import jwt from 'jsonwebtoken';
 
-const SECRET = process.env.JWT_SECRET || 'default_secret';
+const getSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('CRITICAL: JWT_SECRET environment variable is not set.');
+  }
+  return secret;
+};
 
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -10,10 +16,15 @@ export const verifyToken = (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, SECRET);
+    const secret = getSecret();
+    const decoded = jwt.verify(token, secret);
     req.user = decoded;
     next();
   } catch (error) {
+    if (error.message.startsWith('CRITICAL:')) {
+      console.error(error.message);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 };
