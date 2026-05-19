@@ -186,6 +186,16 @@ app.post('/api/leads/bulk', verifyToken, async (req, res) => {
 app.patch('/api/leads/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
+    // SECURITY: Prevent IDOR by ensuring user owns the lead or is an ADMIN
+    const existingLead = await prisma.lead.findUnique({ where: { id } });
+    if (!existingLead) {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+
+    if (existingLead.userId !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Forbidden: You do not have permission to update this lead' });
+    }
+
     const updatedLead = await prisma.lead.update({
       where: { id },
       data: req.body
