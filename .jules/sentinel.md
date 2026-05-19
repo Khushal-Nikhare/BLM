@@ -1,0 +1,4 @@
+## 2024-05-19 - [HIGH] Fix IDOR in `/api/leads/:id` PATCH route
+**Vulnerability:** Insecure Direct Object Reference (IDOR) on the `PATCH /api/leads/:id` endpoint. Any authenticated user could modify leads belonging to other users because there was no ownership validation or admin check before performing the update operation.
+**Learning:** The route previously accepted the `id` from the request parameters and blindly updated the record using `prisma.lead.update`. This lack of ownership verification in a multi-tenant or multi-user context allowed unauthorized modification of objects by guessing or enumerating IDs.
+**Prevention:** Always verify the object's ownership against the authenticated user (`req.user.id`) or verify an administrative role before permitting mutable operations (update/delete) on entities. Use explicit checks such as retrieving the object first and validating ownership, or incorporating the `userId` in the `where` clause of the update query.
