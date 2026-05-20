@@ -1,0 +1,4 @@
+## 2026-05-20 - [Fix Hardcoded JWT Secret Fallback]
+**Vulnerability:** A hardcoded `JWT_SECRET` fallback ('default_secret') was used at the top-level of module files `backend/middleware/auth.js` and `backend/routes/auth.js`.
+**Learning:** Due to ES module semantics, top-level evaluation of `process.env.JWT_SECRET` in imported modules occurs *before* `dotenv.config()` is executed in `backend/index.js`. This caused the environment variable to be undefined at evaluation time, prompting the use of an insecure, hardcoded fallback that compromised the entire JWT authentication scheme.
+**Prevention:** Always evaluate critical environment variables (like secrets) dynamically within function execution contexts rather than at the top level of exported ES modules, especially when relying on `dotenv`. If a critical secret is missing at runtime, fail securely by logging a critical error and returning a 500 Internal Server Error rather than falling back to an insecure value.
