@@ -186,6 +186,18 @@ app.post('/api/leads/bulk', verifyToken, async (req, res) => {
 app.patch('/api/leads/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
+    const lead = await prisma.lead.findUnique({
+      where: { id }
+    });
+
+    if (!lead) {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+
+    if (lead.userId !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Not authorized to update this lead' });
+    }
+
     const updatedLead = await prisma.lead.update({
       where: { id },
       data: req.body
