@@ -1,0 +1,4 @@
+## 2026-05-23 - [Prisma-Specific IDOR Vulnerability Pattern]
+**Vulnerability:** The backend `/api/leads/:id` PATCH endpoint (and potentially other update endpoints) was missing an explicit authorization check to verify lead ownership or admin status before updating, resulting in a critical IDOR vulnerability.
+**Learning:** This missing check occurred because of Prisma's `update()` API constraint. In Prisma, the `where` clause for `update()` only accepts uniquely identifiable fields (like `id`). Developers cannot simply append `userId: req.user.id` to the `where` clause. This structural constraint leads developers to omit the authorization check entirely.
+**Prevention:** Always perform a prior `findUnique()` query to fetch the record and manually verify ownership (`record.userId === req.user.id` or `req.user.role === 'ADMIN'`) before calling Prisma's `update()` or `delete()` methods.
