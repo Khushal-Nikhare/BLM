@@ -1,0 +1,4 @@
+## 2024-05-18 - Insecure Default Secret Fallback with JWT
+**Vulnerability:** The application was using an insecure default secret fallback (`process.env.JWT_SECRET || 'default_secret'`) to sign and verify JWT tokens when the `JWT_SECRET` environment variable was missing.
+**Learning:** Top-level assignment of `process.env` properties combined with `dotenv` can cause secrets to be evaluated before `dotenv.config()` loads variables. This early evaluation leads to `process.env.JWT_SECRET` being `undefined` and forces the use of the insecure hardcoded default.
+**Prevention:** Avoid defining default fallbacks for critical secrets in the codebase. Retrieve sensitive environment variables dynamically within the functions that need them rather than at the top level, and fail securely (e.g., return a 500 status and log a critical error) if the secret is missing.
