@@ -1,0 +1,5 @@
+## 2024-05-27 - [CRITICAL] Insecure JWT_SECRET Fallback and dotenv Timing
+
+**Vulnerability:** The application was falling back to a hardcoded insecure string ('default_secret') for JWT token signing/verification if the `JWT_SECRET` environment variable wasn't present. Additionally, `dotenv` configuration timing in the main entrypoint did not apply top-level `process.env` evaluations in ES modules.
+**Learning:** In Node.js ES modules, imports are hoisted and executed before the top-level code (including `dotenv.config()`) in the entry point is run. If `process.env.JWT_SECRET` is evaluated at the module level (e.g., `const SECRET = process.env.JWT_SECRET`), it evaluates to `undefined`, which forces the insecure fallback.
+**Prevention:** Always evaluate environment variables dynamically inside functions rather than at the module scope when using `dotenv` with ES modules. Furthermore, never use a fallback value for cryptographic secrets; if a secret is missing, the application must fail securely by logging a critical error and aborting the sensitive operation (e.g., returning a 500 error).
