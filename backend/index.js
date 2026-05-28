@@ -66,7 +66,7 @@ app.get("/api/search", verifyToken, async (req, res) => {
   }
 
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${apiKey}`;
+    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${encodeURIComponent(apiKey)}`;
     const response = await axios.get(url);
     const results = response.data.results.map((place) => ({
       googlePlaceId: place.place_id,
@@ -88,8 +88,13 @@ app.get("/api/search", verifyToken, async (req, res) => {
 app.get("/api/place-details/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  if (!apiKey || apiKey === "your_google_maps_api_key_here") {
+    return res
+      .status(500)
+      .json({ error: "Google Places API key is not configured" });
+  }
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${id}&fields=name,rating,formatted_phone_number,website,formatted_address&key=${apiKey}`;
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(id)}&fields=name,rating,formatted_phone_number,website,formatted_address&key=${encodeURIComponent(apiKey)}`;
     const response = await axios.get(url);
     res.json(response.data.result);
   } catch (error) {
