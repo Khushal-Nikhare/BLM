@@ -83,7 +83,7 @@ app.get('/api/place-details/:id', async (req, res) => {
   const { id } = req.params;
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${id}&fields=name,rating,formatted_phone_number,website,formatted_address&key=${apiKey}`;
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(id)}&fields=name,rating,formatted_phone_number,website,formatted_address&key=${apiKey}`;
     const response = await axios.get(url);
     res.json(response.data.result);
   } catch (error) {
